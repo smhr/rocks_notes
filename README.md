@@ -13,6 +13,12 @@ passwd username
 rocks sync users
 ```
 
+Set the full name of the user using the command
+
+```
+chfn  -f "FirstName  Surname"  username
+```
+
 ### Deleting Users
 
 ```
