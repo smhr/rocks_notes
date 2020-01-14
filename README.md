@@ -79,7 +79,10 @@ PartitionName=LONG MaxTime=7-0:0 DefaultTime=00:30:00 MaxNodes=1
 Then assign a node to the created partition
 
 ```
-rocks add host attr compute-0-1 slurm_partitions value='|CLUSTER|WHEEL|SHORT|'
+rocks add host attr compute-0-0 slurm_partitions value='|WHEEL|SHORT|LONG|'
+rocks add host attr compute-0-1 slurm_partitions value='|PARA|WHEEL|LONG|'
+rocks add host attr compute-0-2 slurm_partitions value='|PARA|WHEEL|LONG|'
+rocks add host attr compute-0-3 slurm_partitions value='|PARA|WHEEL|LONG|'
 ```
 
 If the attribute already exists, do
