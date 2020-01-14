@@ -72,8 +72,8 @@ Edit `/etc/slurm/parts ` for example:
 
 ```
 PartitionName=WHEEL RootOnly=yes Priority=1000 Nodes=ALL
-PartitionName=TEST AllowAccounts=root AllowGroups=wheel,root
-PartitionName=SHORT
+PartitionName=SHORT MaxTime=1-0:0 DefaultTime=00:30:00 MaxNodes=1
+PartitionName=LONG MaxTime=7-0:0 DefaultTime=00:30:00 MaxNodes=1
 ```
 
 Then assign a node to the created partition
@@ -85,7 +85,10 @@ rocks add host attr compute-0-1 slurm_partitions value='|CLUSTER|WHEEL|SHORT|'
 If the attribute already exists, do
 
 ```
-rocks set host attr compute-0-0 slurm_partitions value='|CLUSTER|WHEEL|SHORT|'
+rocks set host attr compute-0-0 slurm_partitions value='|WHEEL|SHORT|LONG|'
+rocks set host attr compute-0-1 slurm_partitions value='|PARA|WHEEL|LONG|'
+rocks set host attr compute-0-2 slurm_partitions value='|PARA|WHEEL|LONG|'
+rocks set host attr compute-0-3 slurm_partitions value='|PARA|WHEEL|LONG|'
 ```
 
 And finally don't forget to do `rocks sync slurm`.
