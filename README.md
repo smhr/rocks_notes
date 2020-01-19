@@ -95,3 +95,62 @@ rocks set host attr compute-0-3 slurm_partitions value='|PARA|WHEEL|LONG|'
 ```
 
 And finally don't forget to do `rocks sync slurm`.
+
+### Install developer toolset 7
+
+All steps must be run in frontend.
+
+Enable saving downloaded RPMs in`vim /etc/yum.conf` by changing `keepcache=0` to `keepcache=1`. Then
+
+```
+yum --enablerepo=extras install centos-release-scl
+```
+To just download the package you can do
+
+```
+yumdownloader --enablerepo=extras centos-release-scl
+```
+Then install devtoolset-7
+```
+yum --enablerepo=centos-sclo-rh install devtoolset-7
+```
+To test it: `scl enable devtoolset-7 bash`
+
+Then move downloaded packages for next use (node re-installation)
+
+```
+mkdir ~/devtoolset-7
+mv /var/cache/yum/x86_64/7/extras/packages/*.rpm ~/devtoolset-7
+mv /var/cache/yum/x86_64/7/centos-sclo-rh/packages/*.rpm ~/devtoolset-7
+```
+Make a packages list file
+
+```
+cd ~/devtoolset-7 && ls *.rpm > ~/rpm_names && cd ~ && python ./package.py < rpm_names > rpm_names_with_packages
+```
+
+Now, copy RPMs to `/export/rocks/install/contrib/7.0/x86_64/RPMS`
+
+```
+cp ~/devtoolset-7/*.rpm /export/rocks/install/contrib/7.0/x86_64/RPMS/
+```
+
+Create a new XML configuration file that will extend the current compute.xml configuration file:
+
+```
+cd /export/rocks/install/site-profiles/7.0/nodes
+cp skeleton.xml extend-compute.xml
+```
+
+Copy the content of `rpm_names_with_packages` in `extend-compute.xml`. See ([here](http://www.rocksclusters.org/assets/usersguides/roll-documentation/base/6.1/customization-adding-packages.html)). Then
+
+```
+cd /export/rocks/install
+rocks create distro
+```
+And re-install the nodes:
+
+```
+rocks set host boot compute-0-0 action=install
+rocks run host compute "shutdown -r now"
+```
