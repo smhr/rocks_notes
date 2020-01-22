@@ -72,8 +72,8 @@ Edit `/etc/slurm/parts ` for example:
 
 ```
 PartitionName=WHEEL RootOnly=yes Priority=1000 Nodes=ALL
-PartitionName=SHORT MaxTime=1-0:0 DefaultTime=00:30:00 MaxNodes=1
-PartitionName=LONG MaxTime=7-0:0 DefaultTime=00:30:00 MaxNodes=1
+PartitionName=SHORT MaxTime=1-0:0 DefaultTime=00:30:00 DefMemPerCPU=512 TRESBillingWeights="CPU=1.0,Mem=0.25G,GRES/gpu=2.0" MaxNodes=1
+PartitionName=LONG MaxTime=7-0:0 DefaultTime=00:30:00 DefMemPerCPU=512 TRESBillingWeights="CPU=1.0,Mem=0.25G,GRES/gpu=2.0" MaxNodes=1
 ```
 
 Then assign a node to the created partition
