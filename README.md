@@ -98,7 +98,7 @@ To install conda's shell functions for easier access, first activate, then:
 
 `conda init`
 
-If you'd prefer to conda's base environment not be activated on startup, set the auto_activate_base parameter to false: 
+If you'd prefer to not have conda's base environment be activated on startup, set the auto_activate_base parameter to false: 
 
 `conda config --set auto_activate_base false`
 
@@ -133,7 +133,6 @@ Install [fyrd](https://fyrd.science/releases/) as an example:
 #SBATCH --partition LONG
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --nodelist=compute-0-1
 #SBATCH --output="stdout_jup.txt"
 #SBATCH --error="stderr_jup.txt"
 #SBATCH --mail-user=your_email@um.ac.ir
@@ -161,7 +160,7 @@ Then, in your local computer do (according to whatever you entered as the front-
 
 `ssh -NL 8888:localhost:8800 your_username@scihpc.local`
 
-Then open your browser and got the address:
+Then open your browser and go to the address:
 
 `http://localhost:8800`
 
