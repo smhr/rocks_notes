@@ -88,16 +88,9 @@ And finally don't forget to do
 
 ### Anaconda system wide installation
 
-groupadd anaconda_users -g 10000
-usermod -a -G anaconda_users username
-rocks sync users
+At the final step of installation, please choose to not have conda modify your shell scripts at all. 
 
-logout from username and then login
-
-chgrp -R anaconda_users /share/apps/anaconda3
-chmod 770 -R /share/apps/anaconda3
-
-If choose to not have conda modify your shell scripts at all. To activate conda's base environment in your current shell session:
+To activate conda's base environment in your current shell session:
 
 `eval "$(/share/apps/anaconda3/bin/conda shell.bash hook)"`
 
