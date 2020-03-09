@@ -22,7 +22,9 @@ delete user home directory manually
 ### Some useful commands
 
 `getent group developers # List All Members of a Group`
+
 `groups username         # List all groups a user is a member of (also: id -nG)`
+
 `id username             # Prints information about the specified user and its groups`
 
 ### Missing /etc/411-security/shared.key issue
