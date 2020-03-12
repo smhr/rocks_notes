@@ -22,9 +22,7 @@ delete user home directory manually
 ### Some useful commands
 
 `getent group developers # List All Members of a Group`
-
 `groups username         # List all groups a user is a member of (also: id -nG)`
-
 `id username             # Prints information about the specified user and its groups`
 
 ### Missing /etc/411-security/shared.key issue
@@ -51,6 +49,7 @@ Example : change time zone to America/Newyork to Asia/Tehran
 ### change timezone for frontend and compute
 
 `timedatectl set-timezone Asia/Tehran`
+
 `tentakel timedatectl set-timezone Asia/Tehran`
 
 ### change attribute Kickstart_Timezone for new compute installed
@@ -88,9 +87,16 @@ And finally don't forget to do
 
 ### Anaconda system wide installation
 
-At the final step of installation, please choose to not have conda modify your shell scripts at all. 
+groupadd anaconda_users -g 10000
+usermod -a -G anaconda_users username
+rocks sync users
 
-To activate conda's base environment in your current shell session:
+logout from username and then login
+
+chgrp -R anaconda_users /share/apps/anaconda3
+chmod 770 -R /share/apps/anaconda3
+
+If choose to not have conda modify your shell scripts at all. To activate conda's base environment in your current shell session:
 
 `eval "$(/share/apps/anaconda3/bin/conda shell.bash hook)"`
 
@@ -98,7 +104,7 @@ To install conda's shell functions for easier access, first activate, then:
 
 `conda init`
 
-If you'd prefer to not have conda's base environment be activated on startup, set the auto_activate_base parameter to false: 
+If you'd prefer to conda's base environment not be activated on startup, set the auto_activate_base parameter to false: 
 
 `conda config --set auto_activate_base false`
 
@@ -133,6 +139,7 @@ Install [fyrd](https://fyrd.science/releases/) as an example:
 #SBATCH --partition LONG
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
+#SBATCH --nodelist=compute-0-1
 #SBATCH --output="stdout_jup.txt"
 #SBATCH --error="stderr_jup.txt"
 #SBATCH --mail-user=your_email@um.ac.ir
@@ -160,8 +167,21 @@ Then, in your local computer do (according to whatever you entered as the front-
 
 `ssh -NL 8888:localhost:8800 your_username@scihpc.local`
 
-Then open your browser and go to the address:
+Then open your browser and got the address:
 
 `http://localhost:8800`
 
 If it asks for a token, copy and paste the token in `out.txt` which has been stored in the directory in which you ran your above jupyter job.
+
+### Add anaconda and opt-python module files
+
+Here, we add a module file for loading anaconda environment. Since we have made a few changes in the Rocks's opt-python module, we replace it with the new version. We should add because the Anaconda3 installation path is `/share/apps/anaconda3`, we initially name the module file "anaconda-3", but rename it to "anaconda3" which seems better. :-)
+
+```
+cd ~/my_rocks/modulesfiles
+cp ./anaconda-3 ./opt-python /usr/share/Modules/modulefiles/anaconda3 # copy in frontend
+cp ./anaconda-3 ./opt-python /share/apps/ # copy to a shared place
+rocks run host compute "cp /share/apps/anaconda-3 /usr/share/Modules/modulefiles/" # copy to all nodes
+rocks run host compute "mv /usr/share/Modules/modulefiles/anaconda-3 /usr/share/Modules/modulefiles/anaconda3" # change the name
+rocks run host compute "cp /share/apps/opt-python /usr/share/Modules/modulefiles/" # copy to all nodes
+```
