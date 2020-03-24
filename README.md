@@ -56,7 +56,7 @@ Example : change time zone to America/Newyork to Asia/Tehran
 
 `rocks set attr Kickstart_Timezone Asia/Tehran`
 
-### SLURM notes
+## SLURM notes
 
 ### Add a slurm partition 
 
@@ -195,7 +195,7 @@ rocks sync config
 
 ### lua
 
-Currently is not required, because in Lmod section we will install lua.
+Currently is not required, because in Lmod section we will install lua with rpms.
 
 ```
 yum install ncurses*
@@ -208,6 +208,13 @@ make && make install
 
 ### Lmod
 
+- Install Lmod and lua on front-end:
+
+```
+cd Lmod_rpms
+yum install ./*.rpms ## 
+```
+
 Edit "/etc/profile.d/00-modulepath.sh" as:
 
 ```
@@ -215,6 +222,14 @@ Edit "/etc/profile.d/00-modulepath.sh" as:
   [ "$(readlink /etc/alternatives/modules.sh)" = "/usr/share/lmod/lmod/init/profile" -o -f /etc/profile.d/z00_lmod.sh ] &&
   export MODULEPATH=/etc/modulefiles:/usr/share/Modules/modulefiles || :
 ```
+- Install on nodes:
+
+```
+cp -r Lmod_rpms /share/apps/
+cp install_Lmod.sh /share/apps
+rocks run host compute "/share/apps/install_Lmod.sh"
+```
+- TODO: Must add post installation script for above commands or add rpms to rocks and build distro.
 
 ### Easybuild
 
@@ -235,7 +250,7 @@ source .bashrc
 
 curl -O https://raw.githubusercontent.com/easybuilders/easybuild-framework/develop/easybuild/scripts/bootstrap_eb.py
 
-ml anaconda3
+ml anaconda3 ## I will use the previous installed anaconda3 module
 
 python bootstrap_eb.py $EASYBUILD_PREFIX
 
@@ -246,21 +261,24 @@ module list
 eb --version
 " >> .bashrc
 ```
+### Install libraries
 
-### Install foss-2018b toolchain (GCC, OpenMPI, OpenBLAS/LAPACK, ScaLAPACK(/BLACS), FFTW)
+I will use *my_easyconfig_files* directory to consider modified easyconfig files located in `my_easyconfig_files` directory. Please see https://easybuild.readthedocs.io/en/latest/Using_the_EasyBuild_command_line.html#use-robot.
 
-I will use *my_easyconfig_files* directory to consider modified easyconfig files located in the current directory first see (https://easybuild.readthedocs.io/en/latest/Using_the_EasyBuild_command_line.html#use-robot).
-
+- Install foss-2018b toolchain (GCC, OpenMPI, OpenBLAS/LAPACK, ScaLAPACK(/BLACS), FFTW)
 ```
 eb --parallel=6 foss-2018b.eb --robot=$HOME/my_easyconfig_files
+```
+- Install LAPACK
+```
 eb --parallel=6 OpenBLAS-0.2.19-gompi-2018b-LAPACK-3.6.1.eb --robot=$HOME/my_easyconfig_files
 ```
 
 #### Global setup of modules for all users
 
-On CentOS systems the shell initialization scripts are in /etc/profile.d/. The Lmod RPM has installed several scripts here.
+On CentOS systems the shell initialization scripts are in `/etc/profile.d/`. The Lmod RPM has installed several scripts here.
 
-To set up the EasyBuild environment create in /etc/profile.d/ the file z01_EasyBuild.sh:
+To set up the EasyBuild environment create in `/etc/profile.d/` the file `z01_EasyBuild.sh`:
 
 ```
 if [ -z "$__Init_Default_Modules" ]; then
@@ -272,41 +290,49 @@ else
  module refresh
 fi
 ```
-
+--------------------------------
 ### Network
 
---------------------------------
-Ref: https://github.com/shawfdong/hyades/wiki/Rocks
---------------------------------
+
+Ref:
+[https://github.com/shawfdong/hyades/wiki/Rocks](https://github.com/shawfdong/hyades/wiki/Rocks)
+
 List networks: 
 
+```
 rocks list network
 
 NETWORK  SUBNET          NETMASK         MTU   DNSZONE  SERVEDNS
 private: 10.6.0.0        255.255.0.0     1500  local    True    
 public:  128.114.126.224 255.255.255.224 1500  ucsc.edu False
+```
 
 Add networks: 
 
+```
 rocks add network ib subnet=10.8.0.0 netmask=255.255.0.0 mtu=4092
-rocks add network 10g subnet=10.7.0.0 netmask=255.255.0.0 mtu=9000 <---
+rocks add network 10g subnet=10.7.0.0 netmask=255.255.0.0 mtu=9000 #please note to mtu
 rocks add network ipmi subnet=10.9.0.0 netmask=255.255.0.0
+```
 
 rocks list network
 
+```
 NETWORK  SUBNET          NETMASK         MTU   DNSZONE  SERVEDNS
 10g:     10.7.0.0        255.255.0.0     9000  10g      False
 ib:      10.8.0.0        255.255.0.0     4092  ib       False
 ipmi:    10.9.0.0        255.255.0.0     1500  ipmi     False
 private: 10.6.0.0        255.255.0.0     1500  local    True
 public:  128.114.126.224 255.255.255.224 1500  ucsc.edu False
+```
 
 Set network interfaces on Hyades: 
 
+```
 rocks set host interface subnet hyades iface=ib0 subnet=ib
 rocks set host interface ip hyades iface=ib0 ip=10.8.8.1
-rocks set host interface subnet hyades iface=em2 subnet=10g <---
-rocks set host interface ip hyades iface=em2 ip=10.7.8.1    <---
+rocks set host interface subnet hyades iface=em2 subnet=10g # 10G
+rocks set host interface ip hyades iface=em2 ip=10.7.8.1    # 10G
 rocks set host interface subnet hyades iface=em4 subnet=ipmi
 rocks set host interface ip hyades iface=em4 ip=10.9.8.111
 
@@ -321,8 +347,9 @@ ib      ib0   80:00:00:48:FE:80:00:00:00:00:00:00:00:02:C9:03:00:2A:4A:E7 10.8.8
 
 rocks sync config
 rocks sync host network hyades
-
+```
 -------------------------------
 Ref for adding fast network:
-http://central-7-0-x86-64.rocksclusters.org/roll-documentation/base/7.0/x1403.html#AEN1410
--------------------------------
+
+[http://central-7-0-x86-64.rocksclusters.org/roll-documentation/base/7.0/x1403.html#AEN1410](http://central-7-0-x86-64.rocksclusters.org/roll-documentation/base/7.0/x1403.html#AEN1410)
+
