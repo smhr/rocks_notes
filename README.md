@@ -173,7 +173,7 @@ Then open your browser and got the address:
 
 If it asks for a token, copy and paste the token in `out.txt` which has been stored in the directory in which you ran your above jupyter job.
 
-### Add anaconda and opt-python module files
+### Add anaconda and opt-python modulefiles
 
 Here, we add a module file for loading anaconda environment. Since we have made a few changes in the Rocks's opt-python module, we replace it with the new version. We should add because the Anaconda3 installation path is `/share/apps/anaconda3`, we initially name the module file "anaconda-3", but rename it to "anaconda3" which seems better. :-)
 
@@ -185,3 +185,144 @@ rocks run host compute "cp /share/apps/anaconda-3 /usr/share/Modules/modulefiles
 rocks run host compute "mv /usr/share/Modules/modulefiles/anaconda-3 /usr/share/Modules/modulefiles/anaconda3" # change the name
 rocks run host compute "cp /share/apps/opt-python /usr/share/Modules/modulefiles/" # copy to all nodes
 ```
+
+### Change a compute node name
+
+```
+rocks set host name compute-0-23 compute-0-0
+rocks sync config
+```
+
+### lua
+
+Currently is not required, because in Lmod section we will install lua.
+
+```
+yum install ncurses*
+wget -c https://netix.dl.sourceforge.net/project/lmod/lua-5.1.4.9.tar.bz2
+tar -jxvf lua-5.1.4.9.tar.bz2
+cd lua-5.1.4.9
+./configure --with-static=no --prefix=/share/apps/lua
+make && make install
+```
+
+### Lmod
+
+Edit "/etc/profile.d/00-modulepath.sh" as:
+
+```
+[ -z "$MODULEPATH" ] &&
+  [ "$(readlink /etc/alternatives/modules.sh)" = "/usr/share/lmod/lmod/init/profile" -o -f /etc/profile.d/z00_lmod.sh ] &&
+  export MODULEPATH=/etc/modulefiles:/usr/share/Modules/modulefiles || :
+```
+
+### Easybuild
+
+```
+useradd modules
+passwd modules
+rocks sync users
+chmod a+rx /home/modules/
+
+su -l modules
+
+echo "
+export EASYBUILD_MODULES_TOOL=Lmod
+export EASYBUILD_PREFIX=/home/modules
+" >> .bashrc
+
+source .bashrc
+
+curl -O https://raw.githubusercontent.com/easybuilders/easybuild-framework/develop/easybuild/scripts/bootstrap_eb.py
+
+ml anaconda3
+
+python bootstrap_eb.py $EASYBUILD_PREFIX
+
+echo "
+module use $EASYBUILD_PREFIX/modules/all
+module load EasyBuild
+module list
+eb --version
+" >> .bashrc
+```
+
+### Install foss-2018b toolchain (GCC, OpenMPI, OpenBLAS/LAPACK, ScaLAPACK(/BLACS), FFTW)
+
+I will use *my_easyconfig_files* directory to consider modified easyconfig files located in the current directory first see (https://easybuild.readthedocs.io/en/latest/Using_the_EasyBuild_command_line.html#use-robot).
+
+```
+eb --parallel=6 foss-2018b.eb --robot=$HOME/my_easyconfig_files
+eb --parallel=6 OpenBLAS-0.2.19-gompi-2018b-LAPACK-3.6.1.eb --robot=$HOME/my_easyconfig_files
+```
+
+#### Global setup of modules for all users
+
+On CentOS systems the shell initialization scripts are in /etc/profile.d/. The Lmod RPM has installed several scripts here.
+
+To set up the EasyBuild environment create in /etc/profile.d/ the file z01_EasyBuild.sh:
+
+```
+if [ -z "$__Init_Default_Modules" ]; then
+ export __Init_Default_Modules=1
+ export EASYBUILD_MODULES_TOOL=Lmod
+ export EASYBUILD_PREFIX=/home/modules
+ module use $EASYBUILD_PREFIX/modules/all
+else
+ module refresh
+fi
+```
+
+### Network
+
+--------------------------------
+Ref: https://github.com/shawfdong/hyades/wiki/Rocks
+--------------------------------
+List networks: 
+
+rocks list network
+
+NETWORK  SUBNET          NETMASK         MTU   DNSZONE  SERVEDNS
+private: 10.6.0.0        255.255.0.0     1500  local    True    
+public:  128.114.126.224 255.255.255.224 1500  ucsc.edu False
+
+Add networks: 
+
+rocks add network ib subnet=10.8.0.0 netmask=255.255.0.0 mtu=4092
+rocks add network 10g subnet=10.7.0.0 netmask=255.255.0.0 mtu=9000 <---
+rocks add network ipmi subnet=10.9.0.0 netmask=255.255.0.0
+
+rocks list network
+
+NETWORK  SUBNET          NETMASK         MTU   DNSZONE  SERVEDNS
+10g:     10.7.0.0        255.255.0.0     9000  10g      False
+ib:      10.8.0.0        255.255.0.0     4092  ib       False
+ipmi:    10.9.0.0        255.255.0.0     1500  ipmi     False
+private: 10.6.0.0        255.255.0.0     1500  local    True
+public:  128.114.126.224 255.255.255.224 1500  ucsc.edu False
+
+Set network interfaces on Hyades: 
+
+rocks set host interface subnet hyades iface=ib0 subnet=ib
+rocks set host interface ip hyades iface=ib0 ip=10.8.8.1
+rocks set host interface subnet hyades iface=em2 subnet=10g <---
+rocks set host interface ip hyades iface=em2 ip=10.7.8.1    <---
+rocks set host interface subnet hyades iface=em4 subnet=ipmi
+rocks set host interface ip hyades iface=em4 ip=10.9.8.111
+
+rocks list host interface hyades
+
+SUBNET  IFACE MAC                                                         IP              NETMASK         MODULE NAME   VLAN OPTIONS CHANNEL
+private em3   90:B1:1C:1C:56:41                                           10.6.8.1        255.255.0.0     ------ hyades ---- ------- -------
+10g     em2   90:B1:1C:1C:56:3F                                           10.7.8.1        255.255.0.0     ------ hyades ---- ------- -------
+public  em1   90:B1:1C:1C:56:3D                                           128.114.126.225 255.255.255.224 ------ hyades ---- ------- -------
+ipmi    em4   90:B1:1C:1C:56:43                                           10.9.8.111      255.255.0.0     ------ hyades ---- ------- -------
+ib      ib0   80:00:00:48:FE:80:00:00:00:00:00:00:00:02:C9:03:00:2A:4A:E7 10.8.8.1        255.255.0.0     ------ hyades ---- ------- -------
+
+rocks sync config
+rocks sync host network hyades
+
+-------------------------------
+Ref for adding fast network:
+http://central-7-0-x86-64.rocksclusters.org/roll-documentation/base/7.0/x1403.html#AEN1410
+-------------------------------
