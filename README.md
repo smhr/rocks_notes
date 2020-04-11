@@ -290,6 +290,26 @@ else
  module refresh
 fi
 ```
+
+### X11 forwarding
+
+In forntend add:
+
+```
+ForwardX11Trusted       yes
+```
+
+Add `-Y` flag to the ssh command as:
+
+```
+ssh -Y username@172.21.99.202
+```
+
+Then use `interactive` command as explained before to get an interactive job. In another terminal login to the frontend as above and then to the node you are asigned, e.g.
+
+```
+ssh -Y compute-0-1
+```
 --------------------------------
 ### Network
 
