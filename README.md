@@ -10,6 +10,7 @@ My Rocks and slurm notes
 su -
 useradd username
 passwd username
+chfn -f "Name" username
 rocks sync users
 ```
 
@@ -278,7 +279,7 @@ eb --parallel=6 OpenBLAS-0.2.19-gompi-2018b-LAPACK-3.6.1.eb --robot=$HOME/my_eas
 
 On CentOS systems the shell initialization scripts are in `/etc/profile.d/`. The Lmod RPM has installed several scripts here.
 
-To set up the EasyBuild environment create in `/etc/profile.d/` the file `z01_EasyBuild.sh`:
+To set up the EasyBuild environment, create in `/etc/profile.d/` the file `z01_EasyBuild.sh`:
 
 ```
 if [ -z "$__Init_Default_Modules" ]; then
@@ -289,6 +290,13 @@ if [ -z "$__Init_Default_Modules" ]; then
 else
  module refresh
 fi
+```
+
+Then
+
+```
+cp /etc/profile.d/z01_EasyBuild.sh /share/apps/
+rocks run host compute "cp /share/apps/z01_EasyBuild.sh /etc/profile.d/z01_EasyBuild.sh"
 ```
 
 ### X11 forwarding
@@ -309,6 +317,23 @@ Then use `interactive` command as explained before to get an interactive job. In
 
 ```
 ssh -Y compute-0-1
+```
+
+### Install Mathematica
+
+```
+su -l modules
+mkdir sources/m/Mathematica
+cp Mathematica_8.0.4_LINUX.sh sources/m/Mathematica/
+eb Mathematica-8.0.4.eb --robot=$HOME/my_easyconfig_files
+```
+
+Copy the Mathematica
+
+### Link scratch
+
+```
+rocks run host compute "ln -s /state/partition1 /scratch1"
 ```
 --------------------------------
 ### Network
