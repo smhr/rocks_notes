@@ -23,7 +23,9 @@ delete user home directory manually
 ### Some useful commands
 
 `getent group developers # List All Members of a Group`
+
 `groups username         # List all groups a user is a member of (also: id -nG)`
+
 `id username             # Prints information about the specified user and its groups`
 
 ### Missing /etc/411-security/shared.key issue
@@ -59,7 +61,7 @@ Example : change time zone to America/Newyork to Asia/Tehran
 
 ## SLURM notes
 
-### Add a slurm partition 
+### Add a slurm partition
 
 Edit `/etc/slurm/parts ` for example:
 
@@ -105,11 +107,11 @@ To install conda's shell functions for easier access, first activate, then:
 
 `conda init`
 
-If you'd prefer to conda's base environment not be activated on startup, set the auto_activate_base parameter to false: 
+If you'd prefer to conda's base environment not be activated on startup, set the auto_activate_base parameter to false:
 
 `conda config --set auto_activate_base false`
 
-### Configure conda for all users 
+### Configure conda for all users
 
 To properly configure conda for using `conda activate` for all users, please run:
 
@@ -213,7 +215,7 @@ make && make install
 
 ```
 cd Lmod_rpms
-yum install ./*.rpms ## 
+yum install ./*.rpms ##
 ```
 
 Edit "/etc/profile.d/00-modulepath.sh" as:
@@ -273,6 +275,10 @@ eb --parallel=6 foss-2018b.eb --robot=$HOME/my_easyconfig_files
 - Install LAPACK
 ```
 eb --parallel=6 OpenBLAS-0.2.19-gompi-2018b-LAPACK-3.6.1.eb --robot=$HOME/my_easyconfig_files
+```
+- Add MCA parameter to OpenMPI module files. Open the file `modules/all/OpenMPI/3.1.1-GCC-7.3.0-2.30.lua` and add this environment variable in it.
+```
+setenv("OMPI_MCA_btl", "self,vader,tcp")
 ```
 
 #### Global setup of modules for all users
@@ -342,7 +348,7 @@ rocks run host compute "ln -s /state/partition1 /scratch1"
 Ref:
 [https://github.com/shawfdong/hyades/wiki/Rocks](https://github.com/shawfdong/hyades/wiki/Rocks)
 
-List networks: 
+List networks:
 
 ```
 rocks list network
@@ -352,7 +358,7 @@ private: 10.6.0.0        255.255.0.0     1500  local    True
 public:  128.114.126.224 255.255.255.224 1500  ucsc.edu False
 ```
 
-Add networks: 
+Add networks:
 
 ```
 rocks add network ib subnet=10.8.0.0 netmask=255.255.0.0 mtu=4092
@@ -371,7 +377,7 @@ private: 10.6.0.0        255.255.0.0     1500  local    True
 public:  128.114.126.224 255.255.255.224 1500  ucsc.edu False
 ```
 
-Set network interfaces on Hyades: 
+Set network interfaces on Hyades:
 
 ```
 rocks set host interface subnet hyades iface=ib0 subnet=ib
@@ -397,4 +403,3 @@ rocks sync host network hyades
 Ref for adding fast network:
 
 [http://central-7-0-x86-64.rocksclusters.org/roll-documentation/base/7.0/x1403.html#AEN1410](http://central-7-0-x86-64.rocksclusters.org/roll-documentation/base/7.0/x1403.html#AEN1410)
-
