@@ -59,6 +59,14 @@ Example : change time zone to America/Newyork to Asia/Tehran
 
 `rocks set attr Kickstart_Timezone Asia/Tehran`
 
+### Reinstall a nodes
+
+`rocks set host boot action=install compute-0-0`
+
+`ssh compute-0-0 'shutdown -r now'` or
+
+`rocks run host compute-0-0 'shutdown -r now'`
+
 ## SLURM notes
 
 ### Add a slurm partition
