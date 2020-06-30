@@ -349,6 +349,30 @@ Copy the Mathematica
 ```
 rocks run host compute "ln -s /state/partition1 /scratch1"
 ```
+
+### Create the second partition on compute-0-2
+
+```
+parted /dev/sdb mklabel gpt
+parted /dev/sdb mkpart primary 0% 100%
+mkfs.ext4 /dev/sdb1
+```
+Then add the following line to the fstab file in compute-0-2
+
+```
+/dev/sdb1                                /state/partition2        ext4    defaults         1 2
+```
+
+and then
+
+```
+mount -a
+```
+
+```
+chmod o+t /state/partition2
+```
+
 --------------------------------
 ### Network
 
