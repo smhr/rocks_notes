@@ -289,6 +289,11 @@ eb --parallel=6 OpenBLAS-0.2.19-gompi-2018b-LAPACK-3.6.1.eb --robot=$HOME/my_eas
 setenv("OMPI_MCA_btl", "self,vader,tcp")
 ```
 
+- Install CMake
+```
+eb CMake-3.12.1-GCCcore-7.3.0.eb -r
+```
+
 #### Global setup of modules for all users
 
 On CentOS systems the shell initialization scripts are in `/etc/profile.d/`. The Lmod RPM has installed several scripts here.
