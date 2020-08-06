@@ -355,6 +355,12 @@ Copy the Mathematica
 rocks run host compute "ln -s /state/partition1 /scratch1"
 ```
 
+### Install vim and nano on compute nodes
+
+```
+rocks run host compute "yum -y install nano vim"
+```
+
 ### Create the second partition on compute-0-2
 
 ```
