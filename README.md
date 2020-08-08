@@ -349,6 +349,26 @@ eb Mathematica-8.0.4.eb --robot=$HOME/my_easyconfig_files
 
 Copy the Mathematica
 
+### Install NVIDIA HPC SDK
+
+```sh
+/bin/su -c "/share/apps/install_nvhpc.sh" - modules
+```
+
+Then add these lines to CUDA mudule file at /home/modules/modules/CUDA/CUDA...
+
+```sh
+conflict("nvhpc")
+conflict("nvhpc-nompi")
+conflict("nvhpc-byo-compiler")
+```
+
+and add this line to all nvhpc modules at /home/modules/modules/nvhpc...
+
+```sh
+conflict CUDA
+```
+
 ### Link scratch
 
 ```
