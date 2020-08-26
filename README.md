@@ -294,6 +294,11 @@ setenv("OMPI_MCA_btl", "self,vader,tcp")
 eb CMake-3.12.1-GCCcore-7.3.0.eb -r
 ```
 
+- Install Boost
+```
+eb -r Boost-1.67.0-foss-2018b.eb
+```
+
 #### Global setup of modules for all users
 
 On CentOS systems the shell initialization scripts are in `/etc/profile.d/`. The Lmod RPM has installed several scripts here.
