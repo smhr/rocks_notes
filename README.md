@@ -94,6 +94,20 @@ rocks set host attr compute-0-0 slurm_partitions value='|CLUSTER|WHEEL|SHORT|'
 And finally don't forget to do
 `rocks sync slurm`
 
+### QOS
+
+Limit users in **normal** qos to can use just two nodes
+
+```
+sacctmgr update qos where name=normal set maxnodesperuser=2
+```
+
+and see the changes
+
+```
+sacctmgr show qos format=Name,MaxCpusPerUser,MaxNodesPerUser,MaxJobsPerUser,Flags
+```
+
 ## Anaconda installation and configuration
 
 ### Anaconda system wide installation
