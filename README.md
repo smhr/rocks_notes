@@ -94,6 +94,37 @@ rocks set host attr compute-0-0 slurm_partitions value='|CLUSTER|WHEEL|SHORT|'
 And finally don't forget to do
 `rocks sync slurm`
 
+### Add GPU
+
+Edit `/etc/slurm/gres.conf.1` as
+
+`Name=gpu Type=nvidia File=/dev/nvidia0`
+
+Then edit /var/411/Files.mk to include your template:
+
+`FILES += /etc/slurm/gres.conf.1`
+
+Then
+
+```
+cd /var/411
+make clean
+make
+```
+You must set two new attributes for the node that has GPU
+
+```
+rocks set host attr compute-0-0 slurm_gres_template value="gres.conf.1"
+rocks set host attr compute-0-0 slurm_gres value="gpu"
+```
+
+Then
+
+```
+rocks sync slurm
+scontrol show node compute-0-
+```
+
 ### QOS
 
 Limit users in **normal** qos to can use just two nodes
