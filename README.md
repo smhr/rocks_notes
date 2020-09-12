@@ -139,7 +139,7 @@ and see the changes
 sacctmgr show qos format=Name,MaxCpusPerUser,MaxNodesPerUser,MaxJobsPerUser,Flags
 ```
 
-### Change priorities
+### Change priorities (see [https://slurm.schedmd.com/priority_multifactor.html](Multifactor Priority Plugin))
 
 Open `/etc/slurm/slurm.conf` and change it as
 
