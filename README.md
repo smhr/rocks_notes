@@ -139,6 +139,15 @@ and see the changes
 sacctmgr show qos format=Name,MaxCpusPerUser,MaxNodesPerUser,MaxJobsPerUser,Flags
 ```
 
+### Change priorities
+
+Open `/etc/slurm/slurm.conf` and change it as
+
+```
+PriorityWeightAge=1000
+PriorityMaxAge=14-0
+```
+
 ## Anaconda installation and configuration
 
 ### Anaconda system wide installation
