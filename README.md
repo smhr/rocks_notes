@@ -6,7 +6,7 @@ My Rocks and slurm notes
 
 ### Add New Users
 
-```
+```sh
 su -
 useradd username
 passwd username
@@ -16,7 +16,7 @@ rocks sync users
 
 ### Deleting Users
 
-```
+```sh
 userdel username
 delete user home directory manually
 ```
@@ -73,7 +73,7 @@ Example : change time zone to America/Newyork to Asia/Tehran
 
 Edit `/etc/slurm/parts ` for example:
 
-```
+```sh
 PartitionName=WHEEL RootOnly=yes Priority=1000 Nodes=ALL
 PartitionName=SHORT MaxTime=1-0:0 DefaultTime=00:30:00 DefMemPerCPU=512 TRESBillingWeights="CPU=1.0,Mem=0.25G,GRES/gpu=2.0" MaxNodes=1
 PartitionName=LONG MaxTime=7-0:0 DefaultTime=00:30:00 DefMemPerCPU=512 TRESBillingWeights="CPU=1.0,Mem=0.25G,GRES/gpu=2.0" MaxNodes=1
@@ -81,13 +81,13 @@ PartitionName=LONG MaxTime=7-0:0 DefaultTime=00:30:00 DefMemPerCPU=512 TRESBilli
 
 Then assign a node to the created partition
 
-```
+```sh
 rocks add host attr compute-0-1 slurm_partitions value='|CLUSTER|WHEEL|SHORT|'
 ```
 
 If the attribute already exists, do
 
-```
+```sh
 rocks set host attr compute-0-0 slurm_partitions value='|CLUSTER|WHEEL|SHORT|'
 ```
 
@@ -106,21 +106,21 @@ Then edit /var/411/Files.mk to include your template:
 
 Then
 
-```
+```sh
 cd /var/411
 make clean
 make
 ```
 You must set two new attributes for the node that has GPU
 
-```
+```sh
 rocks set host attr compute-0-0 slurm_gres_template value="gres.conf.1"
 rocks set host attr compute-0-0 slurm_gres value="gpu"
 ```
 
 Then
 
-```
+```sh
 rocks sync slurm
 scontrol show node compute-0-
 ```
@@ -129,13 +129,13 @@ scontrol show node compute-0-
 
 Limit users in **normal** qos to can use just two nodes
 
-```
+```sh
 sacctmgr update qos where name=normal set maxnodesperuser=2
 ```
 
 and see the changes
 
-```
+```sh
 sacctmgr show qos format=Name,MaxCpusPerUser,MaxNodesPerUser,MaxJobsPerUser,Flags
 ```
 
@@ -143,7 +143,7 @@ sacctmgr show qos format=Name,MaxCpusPerUser,MaxNodesPerUser,MaxJobsPerUser,Flag
 
 Open `/etc/slurm/slurm.conf` and change it as
 
-```
+```sh
 PriorityWeightAge=1000
 PriorityMaxAge=14-0
 ```
@@ -178,7 +178,7 @@ If you'd prefer to conda's base environment not be activated on startup, set the
 
 To properly configure conda for using `conda activate` for all users, please run:
 
-```
+```sh
 ln -s /share/apps/anaconda3/etc/profile.d/conda.sh /etc/profile.d/conda.sh
 ```
 
@@ -199,7 +199,7 @@ Install [fyrd](https://fyrd.science/releases/) as an example:
 
 ### An example batch script for running jupyter in the "LONG" partition on a node
 
-```
+```sh
 #!/bin/bash
 #SBATCH -J jupyter
 #SBATCH --partition LONG
@@ -243,7 +243,7 @@ If it asks for a token, copy and paste the token in `out.txt` which has been sto
 
 Here, we add a module file for loading anaconda environment. Since we have made a few changes in the Rocks's opt-python module, we replace it with the new version. We should add because the Anaconda3 installation path is `/share/apps/anaconda3`, we initially name the module file "anaconda-3", but rename it to "anaconda3" which seems better. :-)
 
-```
+```sh
 cd ~/my_rocks/modulesfiles
 cp ./anaconda-3 ./opt-python /usr/share/Modules/modulefiles/anaconda3 # copy in frontend
 cp ./anaconda-3 ./opt-python /share/apps/ # copy to a shared place
@@ -254,7 +254,7 @@ rocks run host compute "cp /share/apps/opt-python /usr/share/Modules/modulefiles
 
 ### Change a compute node name
 
-```
+```sh
 rocks set host name compute-0-23 compute-0-0
 rocks sync config
 ```
@@ -263,7 +263,7 @@ rocks sync config
 
 Currently is not required, because in Lmod section we will install lua with rpms.
 
-```
+```sh
 yum install ncurses*
 wget -c https://netix.dl.sourceforge.net/project/lmod/lua-5.1.4.9.tar.bz2
 tar -jxvf lua-5.1.4.9.tar.bz2
@@ -276,21 +276,21 @@ make && make install
 
 - Install Lmod and lua on front-end:
 
-```
+```sh
 cd Lmod_rpms
 yum install ./*.rpms ##
 ```
 
 Edit "/etc/profile.d/00-modulepath.sh" as:
 
-```
+```sh
 [ -z "$MODULEPATH" ] &&
   [ "$(readlink /etc/alternatives/modules.sh)" = "/usr/share/lmod/lmod/init/profile" -o -f /etc/profile.d/z00_lmod.sh ] &&
   export MODULEPATH=/etc/modulefiles:/usr/share/Modules/modulefiles || :
 ```
 - Install on nodes:
 
-```
+```sh
 cp -r Lmod_rpms /share/apps/
 cp install_Lmod.sh /share/apps
 rocks run host compute "/share/apps/install_Lmod.sh"
@@ -299,7 +299,7 @@ rocks run host compute "/share/apps/install_Lmod.sh"
 
 ### Easybuild
 
-```
+```sh
 useradd modules
 passwd modules
 rocks sync users
@@ -332,25 +332,25 @@ eb --version
 I will use *my_easyconfig_files* directory to consider modified easyconfig files located in `my_easyconfig_files` directory. Please see https://easybuild.readthedocs.io/en/latest/Using_the_EasyBuild_command_line.html#use-robot.
 
 - Install foss-2018b toolchain (GCC, OpenMPI, OpenBLAS/LAPACK, ScaLAPACK(/BLACS), FFTW)
-```
+```sh
 eb --parallel=6 foss-2018b.eb --robot=$HOME/my_easyconfig_files
 ```
 - Install LAPACK
-```
+```sh
 eb --parallel=6 OpenBLAS-0.2.19-gompi-2018b-LAPACK-3.6.1.eb --robot=$HOME/my_easyconfig_files
 ```
 - Add MCA parameter to OpenMPI module files. Open the file `modules/all/OpenMPI/3.1.1-GCC-7.3.0-2.30.lua` and add this environment variable in it.
-```
+```sh
 setenv("OMPI_MCA_btl", "self,vader,tcp")
 ```
 
 - Install CMake
-```
+```sh
 eb CMake-3.12.1-GCCcore-7.3.0.eb -r
 ```
 
 - Install Boost
-```
+```sh
 eb -r Boost-1.67.0-foss-2018b.eb
 ```
 
@@ -360,7 +360,7 @@ On CentOS systems the shell initialization scripts are in `/etc/profile.d/`. The
 
 To set up the EasyBuild environment, create in `/etc/profile.d/` the file `z01_EasyBuild.sh`:
 
-```
+```sh
 if [ -z "$__Init_Default_Modules" ]; then
  export __Init_Default_Modules=1
  export EASYBUILD_MODULES_TOOL=Lmod
@@ -373,7 +373,7 @@ fi
 
 Then
 
-```
+```sh
 cp /etc/profile.d/z01_EasyBuild.sh /share/apps/
 rocks run host compute "cp /share/apps/z01_EasyBuild.sh /etc/profile.d/z01_EasyBuild.sh"
 ```
@@ -382,25 +382,25 @@ rocks run host compute "cp /share/apps/z01_EasyBuild.sh /etc/profile.d/z01_EasyB
 
 In forntend add:
 
-```
+```sh
 ForwardX11Trusted       yes
 ```
 
 Add `-Y` flag to the ssh command as:
 
-```
+```sh
 ssh -Y username@172.21.99.202
 ```
 
 Then use `interactive` command as explained before to get an interactive job. In another terminal login to the frontend as above and then to the node you are asigned, e.g.
 
-```
+```sh
 ssh -Y compute-0-1
 ```
 
 ### Install Mathematica
 
-```
+```sh
 su -l modules
 mkdir sources/m/Mathematica
 cp Mathematica_8.0.4_LINUX.sh sources/m/Mathematica/
@@ -429,43 +429,144 @@ and add this line to all nvhpc modules at /home/modules/modules/nvhpc...
 conflict CUDA
 ```
 
-### Link scratch
-
-```
-rocks run host compute "ln -s /state/partition1 /scratch1"
-```
-
 ### Install vim and nano on compute nodes
 
 ```
 rocks run host compute "yum -y install nano vim"
 ```
 
+## Storage
+
+### Add the second HDD (/work1) on frontend
+
+```sh
+parted /dev/sdc mklabel gpt
+parted /dev/sdc mkpart primary 0% 100%
+mkfs.ext4 /dev/sdc1
+cp /etc/fstab /etc/fstab.back
+mkdir /work1
+echo "/dev/sdc1                                /work1        ext4    defaults         1 2" >> /etc/fstab
+mount -a
+chmod 777 /work1
+chmod o+t /work1
+```
+
+Then export it as
+
+```sh
+echo "/work1 10.1.1.1(rw,async,no_root_squash) 10.1.1.0/255.255.255.0(rw,async)" >> /etc/exports
+exportfs -rv
+rocks run host compute "echo 10.1.1.1:/work1 /work1 nfs rw,hard,intr,rsize=8192,wsize=8192  0 0 >> /etc/fstab"
+rocks run host compute "mkdir /work1"
+rocks run host compute "mount -a"
+```
+
+### Add the 3rd HDD (/work8) on frontend
+
+parted /dev/sdd mklabel gpt
+parted /dev/sdd mkpart primary 0% 100%
+mkfs.ext4 /dev/sdd1
+cp /etc/fstab /etc/fstab.back
+mkdir /work8
+echo "/dev/sdd1                                /work8        ext4    defaults         1 2" >> /etc/fstab
+mount -a
+chmod 777 /work8
+chmod o+t /work8
+
+Then export it as
+```sh
+echo "/work8 10.1.1.1(rw,async,no_root_squash) 10.1.1.0/255.255.255.0(rw,async)" >> /etc/exports
+exportfs -rv
+rocks run host compute "echo 10.1.1.1:/work8 /work8 nfs rw,hard,intr,rsize=8192,wsize=8192  0 0 >> /etc/fstab"
+rocks run host compute "mkdir /work8"
+rocks run host compute "mount -a"
+```
+
+### Link scratches
+
+```sh
+rocks run host compute "ln -s /state/partition1 /scratch1"
+```
+
 ### Create the second partition on compute-0-2
 
-```
+```sh
 parted /dev/sdb mklabel gpt
 parted /dev/sdb mkpart primary 0% 100%
 mkfs.ext4 /dev/sdb1
 ```
 Then add the following line to the fstab file in compute-0-2
 
-```
+```sh
 /dev/sdb1                                /state/partition2        ext4    defaults         1 2
 ```
 
 and then
 
-```
+```sh
 mount -a
 ```
 
-```
+```sh
 chmod o+t /state/partition2
 ```
+---
+### Quota for extra HDD on frontend
 
---------------------------------
-### Network
+```
+### Change fstab as
+/dev/sdc1                                /work1        ext4    defaults,usrquota,grpquota         1 2
+
+umount /dev/sdc1
+mount -a
+quotacheck -cug /work1
+
+### Generate the table of current disk usage per file system
+quotacheck -vug /dev/sdc1
+quotaon -v /dev/sdc1
+
+### Assign quota per user
+edquota user1
+edquota -t  # grace period (all users)
+
+### Verify that the quota for the user1, has been set
+quota -vs username
+
+### Prototype quota from user1 to user2
+edquota -p user1 user2
+
+################
+/dev/sdd1                                /work8        ext4    defaults,usrquota,grpquota         1 2
+
+umount /dev/sdd1
+
+# using the above command the disk could not be unmounted. A process jbd2 was preventing it to unmount. We wait about one day for it, but it continued to run. Finally we find that turning of advanced power management on the drive solves the problem: hdparm -B 255 /dev/sdd
+
+systemctl restart nfs <--- This solves the problem
+
+mount -a
+quotaoff -vug /dev/sdc1 <-- turn off quota on /dev/sdc1 (/work1)
+quotacheck -cug /work8
+
+### Generate the table of current disk usage per file system
+quotacheck -vug /dev/sdd1
+quotaon -v /dev/sdd1
+
+### Assign quota per user
+edquota user1
+edquota -t  # grace period (all users)
+
+### Verify that the quota for the user1, has been set
+quota -vs username
+
+### Prototype quota from user1 to user2
+edquota -p user1 user2
+
+### You can check all the assigned quota
+repquota -as
+```
+---
+## Network
 
 
 Ref:
@@ -473,7 +574,7 @@ Ref:
 
 List networks:
 
-```
+```sh
 rocks list network
 
 NETWORK  SUBNET          NETMASK         MTU   DNSZONE  SERVEDNS
@@ -483,7 +584,7 @@ public:  128.114.126.224 255.255.255.224 1500  ucsc.edu False
 
 Add networks:
 
-```
+```sh
 rocks add network ib subnet=10.8.0.0 netmask=255.255.0.0 mtu=4092
 rocks add network 10g subnet=10.7.0.0 netmask=255.255.0.0 mtu=9000 #please note to mtu
 rocks add network ipmi subnet=10.9.0.0 netmask=255.255.0.0
@@ -491,7 +592,7 @@ rocks add network ipmi subnet=10.9.0.0 netmask=255.255.0.0
 
 rocks list network
 
-```
+```sh
 NETWORK  SUBNET          NETMASK         MTU   DNSZONE  SERVEDNS
 10g:     10.7.0.0        255.255.0.0     9000  10g      False
 ib:      10.8.0.0        255.255.0.0     4092  ib       False
@@ -502,7 +603,7 @@ public:  128.114.126.224 255.255.255.224 1500  ucsc.edu False
 
 Set network interfaces on Hyades:
 
-```
+```sh
 rocks set host interface subnet hyades iface=ib0 subnet=ib
 rocks set host interface ip hyades iface=ib0 ip=10.8.8.1
 rocks set host interface subnet hyades iface=em2 subnet=10g # 10G
