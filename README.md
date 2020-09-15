@@ -139,7 +139,7 @@ and see the changes
 sacctmgr show qos format=Name,MaxCpusPerUser,MaxNodesPerUser,MaxJobsPerUser,Flags
 ```
 
-### Change priorities (see [https://slurm.schedmd.com/priority_multifactor.html](Multifactor Priority Plugin))
+### Change priorities
 
 Open `/etc/slurm/slurm.conf` and change it as
 
@@ -147,6 +147,7 @@ Open `/etc/slurm/slurm.conf` and change it as
 PriorityWeightAge=1000
 PriorityMaxAge=14-0
 ```
+see [multifactor priority plugin](https://slurm.schedmd.com/priority_multifactor.html) for more details.
 
 ## Anaconda installation and configuration
 
