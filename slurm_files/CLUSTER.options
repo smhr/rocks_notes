@@ -1,0 +1,1 @@
+TRESBillingWeights="CPU=1.0,Mem=0.25G,GRES/gpu=2.0" DefMemPerCPU=1545
