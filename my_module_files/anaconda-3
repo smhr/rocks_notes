@@ -1,0 +1,24 @@
+#%Module1.0#####################################################################
+##
+##  anaconda3 modulefile
+##
+## modulefiles/
+##
+proc ModulesHelp { } {
+	global pythonversion 
+
+	puts stderr "\t Use /share/apps/anaconda3/bin/python as your Python"
+	puts stderr "\n\tVersion $pythonversion\n"
+}
+
+module-whatis	"anaconda-3"
+module-whatis	"Version: 3.7.4"
+
+# for Tcl script use only
+set	pythonversion 3.7.4
+
+conflict opt-python
+prepend-path PATH /share/apps/anaconda3/bin/
+prepend-path LD_LIBRARY_PATH /share/apps/anaconda3/lib
+prepend-path LIBPATH /share/apps/anaconda3/lib
+prepend-path MANPATH /share/apps/anaconda3/man
