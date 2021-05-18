@@ -623,7 +623,105 @@ ib      ib0   80:00:00:48:FE:80:00:00:00:00:00:00:00:02:C9:03:00:2A:4A:E7 10.8.8
 rocks sync config
 rocks sync host network hyades
 ```
--------------------------------
 Ref for adding fast network:
 
 [http://central-7-0-x86-64.rocksclusters.org/roll-documentation/base/7.0/x1403.html#AEN1410](http://central-7-0-x86-64.rocksclusters.org/roll-documentation/base/7.0/x1403.html#AEN1410)
+
+See also [this thread](https://marc.info/?l=npaci-rocks-discussion&m=149321672225893&w=2).
+
+---
+### Add 10g to Scicluster network
+
+List nework interfaces on head node
+
+```sh
+rocks list host interface sci
+
+private eno2       00:25:90:94:5D:8D 10.1.1.1      255.255.255.0 ------ sci  ---- ------- -------
+10g     enp129s0f1 ----------------- 10.7.7.1      255.255.255.0 ------ sci  ---- ------- -------
+------- enp4s0f0   00:1B:CD:03:23:F4 ------------- ------------- ------ ---- ---- ------- -------
+------- eno1       00:25:90:94:5D:8C 172.21.127.53 ------------- ------ sci  ---- ------- -------
+------- enp4s0f1   00:1B:CD:03:23:F5 ------------- ------------- ------ ---- ---- ------- -------
+------- enp4s0f2   00:1B:CD:03:23:F6 ------------- ------------- ------ ---- ---- ------- -------
+------- enp4s0f3   00:1B:CD:03:23:F7 ------------- ------------- ------ ---- ---- ------- -------
+```
+
+Remove a previously added 10g interface on head node
+
+```sh
+rocks remove host interface sci enp129s0f1
+
+SUBNET  IFACE    MAC               IP            NETMASK       MODULE NAME VLAN OPTIONS CHANNEL
+private eno2     00:25:90:94:5D:8D 10.1.1.1      255.255.255.0 ------ sci  ---- ------- -------
+------- enp4s0f0 00:1B:CD:03:23:F4 ------------- ------------- ------ ---- ---- ------- -------
+------- eno1     00:25:90:94:5D:8C 172.21.127.53 ------------- ------ sci  ---- ------- -------
+------- enp4s0f1 00:1B:CD:03:23:F5 ------------- ------------- ------ ---- ---- ------- -------
+------- enp4s0f2 00:1B:CD:03:23:F6 ------------- ------------- ------ ---- ---- ------- -------
+------- enp4s0f3 00:1B:CD:03:23:F7 ------------- ------------- ------ ---- ---- ------- -------
+```
+
+Remove testing IPs on compute-0-0 and 0-3
+
+```sh
+0-0
+ip addr del 10.7.7.100/255.255.255.0 dev ens4f0 ---> (Mac address: 8c:dc:d4:b6:03:38)
+ip addr del 10.7.7.254/255.255.255.0 dev ens4f1 ---> (Mac address: 8c:dc:d4:b6:03:39)
+0-3
+ip addr del 10.7.7.201/255.255.255.0 dev ens3f1 ---> (Mac address: 38:ea:a7:31:30:3d)
+```
+
+Add 10g on compute-0-0
+
+```sh
+rocks list host interface compute-0-0
+
+ip link set dev ens4f1 up ---> (Mac address: 8c:dc:d4:b6:03:39)
+
+rocks add host interface compute-0-0 iface=ens4f1 subnet=10g ip=10.7.7.254
+
+rocks set host interface ip compute-0-0 iface=ens4f1 ip=10.7.7.254
+rocks set host interface subnet compute-0-0 iface=ens4f1 subnet=10g
+rocks set host interface name compute-0-0 iface=ens4f1 name=compute-10g-0-0
+rocks set host interface mac compute-0-0 iface=ens4f1 mac=8c:dc:d4:b6:03:39
+rocks sync config
+rocks sync host network compute-0-0
+```
+
+Add 10g on compute-0-2
+
+```sh
+ip link set dev ens1f1 up ---> (Mac address: 14:02:ec:92:7f:c9)
+
+rocks add host interface compute-0-2 iface=ens1f1 subnet=10g ip=10.7.7.252
+rocks set host interface mac compute-0-2 iface=ens1f1 mac=14:02:ec:92:7f:c9
+rocks set host interface ip compute-0-2 iface=ens1f1 ip=10.7.7.252
+rocks set host interface subnet compute-0-2 iface=ens1f1 subnet=10g
+rocks set host interface name compute-0-2 iface=ens1f1 name=compute-10g-0-2
+rocks sync config
+rocks sync host network compute-0-2
+```
+
+Add 10g on compute-0-3
+
+```sh
+rocks list host interface compute-0-3
+SUBNET  IFACE MAC               IP         NETMASK       MODULE NAME        VLAN OPTIONS CHANNEL
+private eno1  ec:eb:b8:86:1a:d0 10.1.1.251 255.255.255.0 ------ compute-0-3 ---- ------- -------
+------- eno2  ec:eb:b8:86:1a:d1 ---------- ------------- ------ ----------- ---- ------- -------
+------- eno4  ec:eb:b8:86:1a:d3 ---------- ------------- ------ ----------- ---- ------- -------
+------- eno3  ec:eb:b8:86:1a:d2 ---------- ------------- ------ ----------- ---- ------- -------
+
+ip link set dev ens3f1 up ---> (Mac address: 38:ea:a7:31:30:3d)
+
+rocks add host interface compute-0-3 iface=ens3f1 subnet=10g ip=10.7.7.251
+rocks set host interface mac compute-0-3 iface=ens3f1 mac=38:ea:a7:31:30:3d
+rocks set host interface ip compute-0-3 iface=ens3f1 ip=10.7.7.251
+rocks set host interface subnet compute-0-3 iface=ens3f1 subnet=10g
+rocks set host interface name compute-0-3 iface=ens3f1 name=compute-10g-0-3
+rocks sync config
+rocks sync host network compute-0-3
+```
+
+```sh
+rocks list host interface compute
+```
