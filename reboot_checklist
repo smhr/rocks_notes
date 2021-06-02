@@ -1,0 +1,13 @@
+* Headnode reboot or shutdown *
+  1. check /work8 is mounted on head node as well as all compute nodes
+  2. check all network and internet connections
+
+* Headnode power failure *
+  1. check /work8 is mounted on head node as well as all compute nodes
+  2. check all network and internet connections
+  3. check quota ```quotacheck -vug /work8```, see https://hpc-um.slack.com/files/U0204V4V5FA/F0239QSG807/quotacheck.sh
+  
+
+* Compute nodes reboot or shutdown *
+  1. check /scratch1 on all compute nodes to be linked to /state/partition1
+  2. check /scratch2 on compute-0-2 to be linked to /state/partition2
