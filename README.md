@@ -98,11 +98,21 @@ And finally don't forget to do
 
 Edit `/etc/slurm/gres.conf.1` as
 
-`Name=gpu Type=nvidia File=/dev/nvidia0`
+`Name=gpu Type=p4000 File=/dev/nvidia0`
+
+and `/etc/slurm/gres.conf.2` as
+
+```
+Name=gpu Type=k80 File=/dev/nvidia0
+Name=gpu Type=k80 File=/dev/nvidia1
+```
 
 Then edit /var/411/Files.mk to include your template:
 
-`FILES += /etc/slurm/gres.conf.1`
+```
+FILES += /etc/slurm/gres.conf.1
+FILES += /etc/slurm/gres.conf.2
+```
 
 Then
 
@@ -115,14 +125,49 @@ You must set two new attributes for the node that has GPU
 
 ```sh
 rocks set host attr compute-0-0 slurm_gres_template value="gres.conf.1"
-rocks set host attr compute-0-0 slurm_gres value="gpu"
+rocks set host attr compute-0-3 slurm_gres_template value="gres.conf.2""
 ```
+
+#### Gres
+
+Gres is a comma delimited list of generic resources specifications for a node. The format is: `<name>[:<type>][:noconsume]:<number>[K|M|G]`. The first field is the resource name, which matches the GresType configuration parameter name. The optional type field might be used to identify a model of that generic resource. It is forbidden to specify both an untyped GRES and a typed GRES with the same `<name>`. The optional `no_consume` field allows you to specify that a generic resource does not have a finite number of that resource that gets consumed as it is requested. The `no_consume` field is a GRES specific setting and applies to the GRES, regardless of the type specified. The final field must specify a generic resources count. A suffix of "K", "M", "G", "T" or "P" may be used to multiply the number by 1024, 1048576, 1073741824, etc. respectively. (e.g.`Gres=gpu:tesla:1,gpu:kepler:1,bandwidth:lustre:no_consume:4G`). By default a node has no generic resources and its maximum count is that of an unsigned 64bit integer. Also see Features for Boolean flags to filter nodes using job constraints.
+
+If one wants to access the GPU devices on a node one must specify the generic consumable resources flag (a.k.a. gres flag). The gres flag has the following syntax:
+`--gres=$(resource_type)[:$(resource_name):$(resource_count)]`
+
+see e.g. [here](https://www-test.chpc.utah.edu/documentation/guides/gpus-accelerators.php).
+
+```
+rocks set host attr compute-0-0 slurm_gres value="gpu:p4000:1"
+rocks set host attr compute-0-3 slurm_gres value="gpu:k80:2"
+```
+
+#### Feature:
+
+Is a comma delimited list of arbitrary strings indicative of some characteristic associated with the node. There is no value or count associated with a feature at this time, a node either has a feature or it does not. A desired feature may contain a numeric component indicating, for example, processor speed but this numeric component will be considered to be part of the feature string. Features are intended to be used to filter nodes eligible to run jobs via the --constraint argument. By default a node has no features. Also see Gres for being able to have more control such as types and count. Using features is faster than scheduling against GRES but is limited to Boolean operations, example:
+
+```
+rocks set host attr compute-0-0 slurm_feature value='quadro'
+rocks add host attr compute-0-3 slurm_feature value='tesla'
+```
+
+We also add some properties to the nodes
+
+```
+rocks set host attr compute-0-0 attr=slurm_properties value='RealMemory=65536 Sockets=2 CoresPerSocket=10 ThreadsPerCore=1'
+rocks set host attr compute-0-1 attr=slurm_properties value='RealMemory=32768 Sockets=2 CoresPerSocket=8 ThreadsPerCore=1'
+rocks set host attr compute-0-2 attr=slurm_properties value='RealMemory=262144 Sockets=2 CoresPerSocket=12 ThreadsPerCore=1'
+rocks set host attr compute-0-3 attr=slurm_properties value='RealMemory=65536 Sockets=2 CoresPerSocket=18 ThreadsPerCore=1'
+```
+
+The unit of RealMemory is MB.
 
 Then
 
 ```sh
 rocks sync slurm
-scontrol show node compute-0-
+rocks sync config
+scontrol show node compute-0-0
 ```
 
 ### QOS
