@@ -448,11 +448,18 @@ ssh -Y compute-0-1
 ```sh
 su -l modules
 mkdir sources/m/Mathematica
-cp Mathematica_8.0.4_LINUX.sh sources/m/Mathematica/
-eb Mathematica-8.0.4.eb --robot=$HOME/my_easyconfig_files
+cp Mathematica_12.3.0_LINUX.sh sources/m/Mathematica/
+eb Mathematica-12.3.0.eb --robot=$HOME/my_easyconfig_files
 ```
 
-Copy the Mathematica
+Then install mesa driver files in `/share/apps/mesa_driver` on compute nodes that do not have nvidia graphics driver installed.
+
+And finally activate mathemetica using the mathpass file as
+
+```sh
+cp /share/apps/mathematica_files/mathpass /home/modules/software/Mathematica/12.3.0/Configuration/Licensing/
+chown modules /home/modules/software/Mathematica/12.3.0/Configuration/Licensing/mathpass
+```
 
 ### Install NVIDIA HPC SDK
 

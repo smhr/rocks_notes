@@ -1,0 +1,15 @@
+name = 'Mathematica'
+version = '12.3.0'
+
+homepage = 'https://www.wolfram.com/mathematica'
+description = """Mathematica is a computational software program used in many scientific, engineering, mathematical
+and computing fields."""
+
+toolchain = SYSTEM
+
+sources = ['Mathematica_%(version)s_LINUX.sh']
+checksums = ['045df045f6e796ded59f64eb2e0f1949ac88dcba1d5b6e05fb53ea0a4aed7215']
+
+license_server = 'license.example.com'
+
+moduleclass = 'math'
