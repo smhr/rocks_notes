@@ -170,18 +170,39 @@ rocks sync config
 scontrol show node compute-0-0
 ```
 
-### QOS
+### QOS in slurm
 
-Limit users in **normal** qos to can use just two nodes
-
+Add or update "month" QOS
 ```sh
-sacctmgr update qos where name=normal set maxnodesperuser=2
+sacctmgr add qos month maxnodesperuser=2 priority=1 maxwall=30-00:00:00 flags=PartitionTimeLimit # The specified flag is necessary to override timelimit of partition
+```
+```sh
+sacctmgr update qos where name=month set maxnodesperuser=2 priority=1 MaxWall=30-00:00:00 flags=PartitionTimeLimit
 ```
 
-and see the changes
-
+Add QOS to XXXX user
 ```sh
-sacctmgr show qos format=Name,MaxCpusPerUser,MaxNodesPerUser,MaxJobsPerUser,Flags
+sacctmgr -i modify user where name=XXXX set QOS=low,normal
+sacctmgr -i modify user where name=XXXX set QOS+=high
+```
+Add QOS to XXXX group
+```sh
+sacctmgr -i modify user where account=XXXX set QOS=low,normal,high
+sacctmgr show association format=account,user,qos
+```
+The DefaultQOS of a user/account may be set by:
+```sh
+sacctmgr -i modify user where name=XXXX set DefaultQOS=low
+sacctmgr -i modify user where account=XXXX set DefaultQOS=low
+```
+Show QOSs
+```sh
+sacctmgr show qos format=Name,MaxCpusPerUser,MaxNodesPerUser,MaxJobsPerUser,Flags,Priority,Maxwall
+```
+
+Show all job history
+```sh
+sacct -a -T -S2015-01-01-00:00 -E2022-01-01-00:00 -X -ojobid,jobname,user,start,end,state
 ```
 
 ### Change priorities
